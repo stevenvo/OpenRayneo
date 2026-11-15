@@ -82,8 +82,12 @@ to be disabled because Android restarted its companion service after force-stop.
 Version en4 passes 20 unit tests and release lint (zero errors, 16 warnings).
 Ten speech tests cover silence/click rejection, pause detection, pre-roll,
 duration limits, PCM/WAV encoding, stereo handling, and cancellation generations.
-End-to-end glasses voice and extended background reliability are still being
-validated; an APK build alone does not establish hardware compatibility.
+End-to-end glasses voice was verified on 2026-11-14 with Strix 1.0.6.11:
+SPP microphone packets were decoded, `gpt-transcribe` returned English text,
+the configured phone model answered, and the wearer confirmed the answer in
+the lenses. Multiple speech turns completed. Extended background reliability,
+noisy environments, and voice-to-Computer-Codex remain unverified; typed
+requests to both assistants were previously verified on this setup.
 The original application can be removed separately; this package has its own
 settings and Android app identity.
 

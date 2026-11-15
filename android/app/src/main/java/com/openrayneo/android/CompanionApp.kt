@@ -66,7 +66,7 @@ internal fun CompanionApp(model: AppModel, actions: UiActions) {
                                 "model" -> "Phone model"
                                 "computer" -> "Computer connection"
                                 "diagnostics" -> "Devices and diagnostics"
-                                else -> listOf("OpenRayneo", "Navigation", "Assistant")[tab]
+                                else -> listOf("OpenRayneo", "Navigation", "Assistant", "Features")[tab]
                             }
                         )
                     },
@@ -104,8 +104,9 @@ internal fun CompanionApp(model: AppModel, actions: UiActions) {
                             Icons.Outlined.Visibility,
                             Icons.Outlined.NearMe,
                             Icons.AutoMirrored.Outlined.Chat,
+                            Icons.Outlined.Apps,
                         )
-                    listOf("Glasses", "Navigation", "Assistant").forEachIndexed { index, title ->
+                    listOf("Glasses", "Navigation", "Assistant", "Features").forEachIndexed { index, title ->
                         NavigationBarItem(
                             selected = tab == index,
                             onClick = { tab = index },
@@ -166,7 +167,8 @@ internal fun CompanionApp(model: AppModel, actions: UiActions) {
                                         { sources = true },
                                         { devices = true },
                                     )
-                                else -> AssistantScreen(model, actions, { route = it })
+                                2 -> AssistantScreen(model, actions, { route = it })
+                                else -> FeaturesScreen(model)
                             }
                         }
             }

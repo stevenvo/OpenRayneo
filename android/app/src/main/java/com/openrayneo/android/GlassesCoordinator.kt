@@ -42,7 +42,7 @@ internal object GlassesCoordinator {
             is GlassesEvent.VoiceFeedbackChanged -> state = state.copy(voiceFeedback = event.content)
             GlassesEvent.BeginConnection -> {
                 resetSession()
-                setIntent(if (state.navigation.enabled) DisplayIntent.Navigation else DisplayIntent.PromptStandby)
+                setIntent(if (state.navigation.enabled) DisplayIntent.Navigation else DisplayIntent.Idle)
                 state = state.copy(link = LinkState(LinkPhase.CONNECTING, "Connecting to glasses"), disconnecting = false)
             }
             is GlassesEvent.LinkChanged -> {

@@ -22,6 +22,11 @@ internal class BridgeService : Service() {
     private lateinit var display: GlassesDisplay
     private lateinit var audio: PromptAudio
     private lateinit var voice: GlassesVoice
+    private lateinit var captions: LocalCaptions
+    private lateinit var teleprompter: Teleprompter
+    val captionState get() = captions.state
+    val teleprompterState get() = teleprompter.state
+    private var featureGeneration = 0
     private val weather = WeatherTool()
     val glassesVoice get() = voice.state
     val navigation get() = NavigationFeed
@@ -97,11 +102,21 @@ internal class BridgeService : Service() {
         settings = AppSettings(this)
         supervisor = ConnectionSupervisor(this, main,
             { dispatch(GlassesEvent.LinkChanged(it)) }, { devices[it.bluetooth.address] = it; notifyUI() },
-            { frame, source -> runCatching { display.receive(frame, source) }.onFailure { onLog("Unable to parse glasses message: $source") } }, ::onLog)
+            { frame, source -> runCatching { if (!teleprompter.receive(frame)) display.receive(frame, source) }.onFailure { onLog("Unable to parse glasses message: $source") } }, ::onLog)
         voice = GlassesVoice(settings, ::voiceChanged, ::onLog) { source, text ->
             submitAnswer(source, text, fromGlassesVoice = true)
         }
-        audio = PromptAudio(voice::consume)
+        captions = LocalCaptions(this) {
+            if (initialized && !destroyed) {
+                if (captions.state.active) {
+                    val text = listOf(captions.state.transcript, captions.state.partial).filter { it.isNotBlank() }.joinToString("\n").takeLast(1200)
+                    dispatch(GlassesEvent.VoiceFeedbackChanged(PageContent("captions:$text", "Live captions", text.ifBlank { captions.state.detail })))
+                }
+                updateNotification(); notifyUI()
+            }
+        }
+        teleprompter = Teleprompter(main, connection::sendFrame) { if (initialized) { updateNotification(); notifyUI() } }
+        audio = PromptAudio { left, right -> voice.consume(left, right); captions.consume(left, right) }
         display = GlassesDisplay(connection::sendFrame,
             { task, delay -> main.postDelayed(task, delay) }, { main.removeCallbacks(it) }, ::onLog,
             { id, signal -> dispatch(GlassesEvent.SessionSignal(id, signal)) },
@@ -164,6 +179,12 @@ internal class BridgeService : Service() {
                 }
             }
         } finally { dispatching = false }
+        if (::captions.isInitialized && captions.state.active && (state.link.phase != LinkPhase.FULL || state.disconnecting ||
+            state.ownership != DisplayOwnership.APP || state.intent == DisplayIntent.Idle || state.error != null ||
+            state.audio.phase in setOf(AudioPhase.FAILED, AudioPhase.STALLED))) {
+            captions.stop("Transcription stopped because the glasses page or audio ended.")
+        }
+        if (::teleprompter.isInitialized && teleprompter.state.active && state.link.phase != LinkPhase.FULL) teleprompter.reset()
         if (voice.state.enabled && (state.link.phase != LinkPhase.FULL || state.disconnecting ||
             state.ownership != DisplayOwnership.APP || state.intent == DisplayIntent.Idle ||
             state.error != null || state.audio.phase == AudioPhase.FAILED || state.audio.phase == AudioPhase.STALLED)) {
@@ -214,11 +235,20 @@ internal class BridgeService : Service() {
         }
     }
     fun disconnect() {
-        stopGlassesVoice()
+        featureGeneration++; stopCaptions(); stopGlassesVoice()
         supervisor.cancelRetries()
-        dispatch(GlassesEvent.Disconnect)
+        if (teleprompter.state.active) {
+            var finished = false
+            val finish = {
+                if (!finished) { finished = true; teleprompter.reset(); dispatch(GlassesEvent.Disconnect) }
+            }
+            teleprompter.control("stop", finish)
+            main.postDelayed({ finish() }, 1500)
+        } else dispatch(GlassesEvent.Disconnect)
     }
     fun followNavigation(key: String) {
+        check(!teleprompter.state.active) { "Stop the teleprompter first." }
+        featureGeneration++; stopCaptions()
         stopGlassesVoice()
         check(!state.disconnecting) { "Wait for disconnection to finish" }
         val entry = checkNotNull(navigation.entries[key]) { "This notification is gone. Start Gaode navigation and refresh." }
@@ -231,8 +261,11 @@ internal class BridgeService : Service() {
         val key = navigation.selectedKey ?: error("Select a Gaode notification to follow first")
         followNavigation(key)
     }
-    fun pausePrompt() { stopGlassesVoice(); dispatch(GlassesEvent.PauseDisplay) }
-    fun openStandby() = dispatch(GlassesEvent.OpenStandby)
+    fun pausePrompt() { featureGeneration++; stopCaptions(); stopGlassesVoice(); dispatch(GlassesEvent.PauseDisplay) }
+    fun openStandby() {
+        check(!teleprompter.state.active) { "Stop the teleprompter first." }
+        dispatch(GlassesEvent.OpenStandby)
+    }
     fun retryAudio() {
         check(state.link.phase == LinkPhase.FULL && state.session?.phase in setOf(PagePhase.LAYOUT, PagePhase.SETTLING, PagePhase.READY)) {
             "Start navigation or Live prompts and wait for the glasses to confirm"
@@ -242,6 +275,8 @@ internal class BridgeService : Service() {
     fun dismissAnswer() = dispatch(GlassesEvent.DismissAnswer)
 
     fun startGlassesVoice(source: AnswerSource) {
+        check(!teleprompter.state.active) { "Stop the teleprompter first." }
+        featureGeneration++; stopCaptions()
         check(state.link.phase == LinkPhase.FULL && !state.disconnecting) { "Connect the glasses fully before starting glasses voice." }
         check(!agent.running && !codex.running) { "Wait for the current assistant request to finish." }
         if (source == AnswerSource.COMPUTER_CODEX) check(codex.connected) { "Connect Computer Codex first." }
@@ -265,6 +300,10 @@ internal class BridgeService : Service() {
     fun sendGlassesSpeech() = voice.sendNow()
 
     fun submitAnswer(source: AnswerSource, text: String, fromGlassesVoice: Boolean = false) {
+        if (!fromGlassesVoice) {
+            check(!teleprompter.state.active) { "Stop the teleprompter before displaying an assistant answer." }
+            featureGeneration++; stopCaptions()
+        }
         if (!fromGlassesVoice && voice.state.enabled) stopGlassesVoice()
         if (!fromGlassesVoice) dispatch(GlassesEvent.VoiceFeedbackChanged(null))
         when (source) {
@@ -311,6 +350,8 @@ internal class BridgeService : Service() {
         if (text.isNotBlank()) dispatch(GlassesEvent.AnswerCompleted(AnswerContent(permit.ref, question, text), permit))
     }
     fun revealAnswer(source: AnswerSource) {
+        check(!teleprompter.state.active) { "Stop the teleprompter first." }
+        featureGeneration++; stopCaptions()
         check(state.link.phase == LinkPhase.FULL && !state.disconnecting) { "Establish a full glasses connection first" }
         val (question, answer) = when (source) {
             AnswerSource.MOBILE_AGENT -> agent.question to agent.answer
@@ -319,6 +360,43 @@ internal class BridgeService : Service() {
         require(answer.isNotBlank()) { "No answer to display yet" }
         dispatch(GlassesEvent.RevealAnswer(AnswerContent(AnswerRef(source, ++nextAnswer), question, answer)))
     }
+    fun startCaptions() {
+        check(state.link.phase == LinkPhase.FULL && !state.disconnecting) { "Connect the glasses first." }
+        check(!teleprompter.state.active && !agent.running && !codex.running) { "Stop the current feature or assistant task first." }
+        featureGeneration++; stopGlassesVoice(); stopCaptions()
+        dispatch(GlassesEvent.StopNavigation); openStandby()
+        captions.start()
+    }
+    fun stopCaptions() {
+        if (::captions.isInitialized && captions.state.active) {
+            captions.stop()
+            dispatch(GlassesEvent.VoiceFeedbackChanged(null))
+        }
+    }
+    fun returnHome() {
+        featureGeneration++; stopCaptions(); stopGlassesVoice()
+        dispatch(GlassesEvent.StopNavigation); dispatch(GlassesEvent.PauseDisplay)
+        if (teleprompter.state.active) teleprompter.control("stop")
+    }
+    fun startTeleprompter(title: String, text: String, speed: Int) {
+        check(state.link.phase == LinkPhase.FULL && !state.disconnecting) { "Connect the glasses first." }
+        check(!teleprompter.state.active && !agent.running && !codex.running) { "Stop the current feature or assistant task first." }
+        ScriptTransfer("validate", "validate", text)
+        require(speed in 30..300) { "Speed must be 30–300." }
+        returnHome()
+        val token = ++featureGeneration
+        val deadline = android.os.SystemClock.elapsedRealtime() + 5000
+        fun begin() {
+            if (token != featureGeneration || destroyed) return
+            if (state.link.phase != LinkPhase.FULL || state.disconnecting) return
+            if (state.error != null) { onLog("Cannot start teleprompter: previous page did not close."); return }
+            if (state.session == null) teleprompter.start(title, text, speed)
+            else if (android.os.SystemClock.elapsedRealtime() < deadline) main.postDelayed({ begin() }, 50)
+            else onLog("Previous display page did not close. Return home and retry.")
+        }
+        begin()
+    }
+    fun controlTeleprompter(action: String) = teleprompter.control(action)
     private fun navigationSnapshot() = NavigationState(navigation.enabled, navigation.selectedKey, navigation.frame)
     private fun executeTool(name: String, args: JSONObject, completion: (Result<JSONObject>) -> Unit) {
         when (name) {
@@ -340,7 +418,9 @@ internal class BridgeService : Service() {
         if (!dispatching) notifyUI()
     }
     private fun notifyUI() { if (initialized && !destroyed) observers.toList().forEach { it() } }
-    private fun summary() = if (::voice.isInitialized && voice.state.enabled) "Glasses voice · ${voice.state.detail}" else state.displayDescription + when (state.audio.phase) {
+    private fun summary() = if (::captions.isInitialized && captions.state.active) "Live captions · ${captions.state.detail}"
+        else if (::teleprompter.isInitialized && teleprompter.state.active) "Teleprompter · ${teleprompter.state.detail}"
+        else if (::voice.isInitialized && voice.state.enabled) "Glasses voice · ${voice.state.detail}" else state.displayDescription + when (state.audio.phase) {
         AudioPhase.RECEIVING -> " · Receiving audio"
         AudioPhase.WAITING_PACKET, AudioPhase.WAITING_PCM -> " · Waiting for audio"
         AudioPhase.STALLED -> " · Audio interrupted"
@@ -367,7 +447,7 @@ internal class BridgeService : Service() {
     override fun onDestroy() {
         destroyed = true; observers.clear(); main.removeCallbacksAndMessages(null)
         navigation.observers.remove(navigationObserver)
-        voice.close(); weather.close(); agent.close(); codex.close(); display.reset(); audio.close(); supervisor.close()
+        featureGeneration++; captions.close(); teleprompter.reset(); voice.close(); weather.close(); agent.close(); codex.close(); display.reset(); audio.close(); supervisor.close()
         stopForeground(STOP_FOREGROUND_REMOVE)
         super.onDestroy()
     }

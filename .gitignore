@@ -36,3 +36,6 @@ analysis/
 *.p12
 *.pem
 private/
+
+# Downloaded speech model; reproduce with scripts/prepare-speech-model.py
+android/app/src/main/assets/vosk-model-small-en-us-0.15/

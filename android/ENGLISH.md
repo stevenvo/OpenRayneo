@@ -6,13 +6,51 @@ Source: https://github.com/stevenvo/OpenRayneo/tree/english-android
 
 - Name: OpenRayneo English
 - Package: com.openrayneo.android.english
-- Version: 1.0.0-en6 (25)
+- Version: 1.0.0-en7 (26)
 - Android: 13 or later
 - Release build: not debuggable, signed with this lab's development certificate.
 
 The setup guide, tabs, settings, assistant, permission guidance, diagnostics,
 connection errors and test notification are translated into English. The phone
 assistant defaults to English while preserving its tool-use limitations.
+
+## Features in en7 (physical glasses acceptance pending)
+
+The **Features** tab adds a local script library (up to 30 scripts), UTF-8 TXT
+import (32,000 bytes per script), native teleprompter transfer and playback
+controls, and continuous offline English captions with explicit TXT export.
+The teleprompter uses the upstream 0x11/0x14 protocol; successful writes are
+not a receipt that the wearer saw playback. Smart-follow, DOC/PDF import and
+synchronization with the official script library are not implemented.
+
+Offline captions use Vosk on the phone. They do not upload audio or use the
+OpenAI key. Recognition quality, long background sessions, and actual glasses
+caption display still require wearer testing. The transcript retains the most
+recent 60,000 characters in memory and is saved only through explicit export.
+The OpenAI assistant voice path below is separate.
+
+Connecting now leaves the stock glasses home screen alone. **Return to glasses
+home** closes companion display/audio and stops the active feature. It does
+not replace the firmware launcher or remap the crown. Native wake-word settings
+remain unchanged: [validation](../docs/wake-word-validation.md).
+
+Build preparation: run `python3 scripts/prepare-speech-model.py` from the repo
+root before Gradle. The model is hash-pinned, excluded from Git, and packaged
+inside the APK. See [speech dependencies/licenses](THIRD_PARTY_SPEECH.md).
+
+[Baseline feature audit and parity gaps](../docs/feature-audit-en6.md) distinguish
+upstream desktop features from Android implementations. Full official-app
+parity is a development target, not a claim for this release. Translation,
+notification mirroring, recording, native dashboard sync/settings, native wake
+integration and broader navigation remain unfinished.
+
+The en7 release passes 46 unit tests and release lint (zero errors, 17 warnings).
+A separate instrumentation smoke test passed on the Samsung: the bundled Vosk
+model loaded and processed synthetic silence without microphone, Bluetooth or
+network access. On-phone checks confirmed script save/open and that a Bluetooth
+connection leaves the display idle with glasses audio stopped. Native script
+playback, caption accuracy and long-running sessions still need wearer testing.
+An Android CI workflow is included; these results are from local/device checks.
 
 ## Glasses voice (experimental)
 

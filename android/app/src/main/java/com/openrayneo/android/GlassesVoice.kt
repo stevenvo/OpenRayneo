@@ -4,40 +4,42 @@ package com.openrayneo.android
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
-import java.io.IOException
+import okhttp3.OkHttpClient
 import java.net.URI
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
-/** Explicitly armed glasses audio -> English ASR -> existing assistant. Main-thread lifecycle. */
+/** Explicitly armed glasses audio -> streaming English ASR -> existing assistant. */
 internal class GlassesVoice(
     private val settings: AppSettings,
     private val changed: () -> Unit,
     private val log: (String) -> Unit,
     private val submit: (AnswerSource, String) -> Unit,
 ) {
-    enum class Phase { OFF, LISTENING, SPEAKING, TRANSCRIBING, ANSWER, COOLDOWN }
+    enum class Phase { OFF, CONNECTING, LISTENING, SPEAKING, TRANSCRIBING, ANSWER, COOLDOWN }
     data class State(
         val phase: Phase = Phase.OFF,
         val source: AnswerSource = AnswerSource.MOBILE_AGENT,
         val detail: String = "Use the glasses microphone for your questions.",
+        val transcript: String = "",
     ) {
         val enabled get() = phase != Phase.OFF
         val target get() = if (source == AnswerSource.MOBILE_AGENT) "Phone model" else "Computer Codex"
     }
     @Volatile var state = State(); private set
     private val main = Handler(Looper.getMainLooper())
-    private val capture = UtteranceCapture()
+    @Volatile private var stream: OpenAiSpeechStream? = null
+    private val capture = UtteranceCapture { stream?.append(it) ?: it.fill(0) }
     private val updatePending = AtomicBoolean()
     private val http = OkHttpClient.Builder().followRedirects(false).followSslRedirects(false)
-        .connectTimeout(20, TimeUnit.SECONDS).callTimeout(45, TimeUnit.SECONDS).build()
-    private var call: Call? = null
+        .connectTimeout(15, TimeUnit.SECONDS).readTimeout(0, TimeUnit.SECONDS)
+        .pingInterval(20, TimeUnit.SECONDS).build()
     @Volatile private var lastAudio = 0L
+    private var generation = 0L
+    private var phaseStarted = 0L
     private var resumeAt = 0L
+    private var keepAnswerWhileConnecting = false
+    private var emptyTurns = 0
 
     private fun apiKey(): String {
         val config = settings.read()
@@ -50,27 +52,68 @@ internal class GlassesVoice(
     fun checkConfiguration() { apiKey() }
 
     fun start(source: AnswerSource) {
-        checkConfiguration()
-        stop()
+        checkConfiguration(); stop(); emptyTurns = 0
         lastAudio = SystemClock.elapsedRealtime()
-        capture.arm()
-        publish(State(Phase.LISTENING, source, "Listening through glasses. Speak, then pause."))
-        log("Glasses voice enabled for ${state.target}")
+        state = State(source = source)
+        connectStream(false)
+        log("Glasses streaming voice enabled for ${state.target}")
     }
-
-    fun stop(reason: String = "Glasses voice is off.") {
-        capture.stop(); call?.cancel(); call = null; resumeAt = 0
+    private fun connectStream(keepAnswer: Boolean) {
+        val token = ++generation
+        capture.stop(); stream?.close(); stream = null
+        keepAnswerWhileConnecting = keepAnswer
+        publish(state.copy(phase = Phase.CONNECTING, detail = "Connecting live transcription…", transcript = ""))
+        fun current() = token == generation && state.enabled
+        stream = OpenAiSpeechStream(http, apiKey(),
+            ready = { main.post {
+                if (current()) {
+                    capture.arm()
+                    publish(state.copy(phase = Phase.LISTENING, detail = "Listening through glasses. Speak, then pause."))
+                    log("Glasses voice: streaming connection ready")
+                }
+            } },
+            partial = { text -> main.post {
+                if (current() && state.phase in setOf(Phase.LISTENING, Phase.SPEAKING, Phase.TRANSCRIBING)) {
+                    publish(state.copy(transcript = text))
+                }
+            } },
+            complete = { text -> main.post {
+                if (current() && state.phase == Phase.TRANSCRIBING) {
+                    stream?.close(); stream = null
+                    log("Glasses voice: final streaming transcript received")
+                    if (text.isBlank()) {
+                        emptyTurns++
+                        if (emptyTurns >= 5) stop("Repeated background noise without clear speech. Move somewhere quieter, then start voice again.")
+                        else {
+                            resumeAt = SystemClock.elapsedRealtime() + 750
+                            publish(state.copy(phase = Phase.COOLDOWN, detail = "No speech detected. Listening resumes shortly.", transcript = ""))
+                        }
+                    } else {
+                        emptyTurns = 0
+                        publish(state.copy(phase = Phase.ANSWER, detail = "${state.target} is answering…", transcript = text))
+                        runCatching { submit(state.source, text) }.onFailure {
+                            stop("Unable to send the question. Check the assistant connection, then start again.")
+                        }
+                    }
+                }
+            } },
+            error = { message -> main.post { if (current()) { log(message); stop(message) } } },
+        )
+    }
+    fun stop(reason: String = "Start Glasses voice on your phone to ask a question.") {
+        generation++; capture.stop(); stream?.close(); stream = null; resumeAt = 0
         val wasEnabled = state.enabled
-        publish(state.copy(phase = Phase.OFF, detail = reason))
+        publish(state.copy(phase = Phase.OFF, detail = reason, transcript = ""))
         if (wasEnabled) log("Glasses voice stopped")
     }
 
-    /** Runs on the Opus decoder worker; never blocks that worker on network or UI. */
+    /** Decoder worker: bounded PCM processing and non-blocking WebSocket sends only. */
     fun consume(left: ShortArray, right: ShortArray) {
         if (!state.enabled) return
         lastAudio = SystemClock.elapsedRealtime()
+        if (state.phase !in setOf(Phase.LISTENING, Phase.SPEAKING)) return
         val clip = capture.push(SpeechPcm.mono(left, right))
-        if (clip != null) main.post { transcribe(clip) }
+        if (clip != null) main.post { commit(clip) }
         if (capture.isSpeaking() != (state.phase == Phase.SPEAKING) && updatePending.compareAndSet(false, true)) {
             main.post {
                 updatePending.set(false)
@@ -82,92 +125,52 @@ internal class GlassesVoice(
             }
         }
     }
-
-    fun sendNow() {
-        capture.finish()?.let(::transcribe)
+    fun sendNow() { capture.finish()?.let(::commit) }
+    private fun commit(clip: UtteranceCapture.Clip) {
+        val duration = clip.samples.size / 48_000.0
+        clip.samples.fill(0)
+        if (!state.enabled || !capture.isCurrent(clip.generation)) return
+        publish(state.copy(phase = Phase.TRANSCRIBING, detail = "Finishing your English transcript…"))
+        stream?.commit()
+        log("Glasses voice: committed $duration seconds of streamed audio")
     }
-
-    private fun transcribe(clip: UtteranceCapture.Clip) {
-        if (!state.enabled || !capture.isCurrent(clip.generation)) { clip.samples.fill(0); return }
-        try {
-            val token = apiKey()
-            val wav = SpeechPcm.wav(clip.samples)
-            clip.samples.fill(0)
-            val body = MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("model", "gpt-transcribe")
-                .addFormDataPart("languages[]", "en")
-                .addFormDataPart("file", "glasses.wav", wav.toRequestBody("audio/wav".toMediaType()))
-                .build()
-            val request = Request.Builder().url("https://api.openai.com/v1/audio/transcriptions")
-                .header("Authorization", "Bearer $token").post(body).build()
-            publish(state.copy(phase = Phase.TRANSCRIBING, detail = "Transcribing glasses speech in English…"))
-            log("Glasses voice: transcribing ${(wav.size - 44) / 96_000.0} seconds")
-            val activeCall = http.newCall(request)
-            call = activeCall
-            activeCall.enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    wav.fill(0)
-                    main.post { fail(clip.generation, "Transcription connection failed. Check internet, then start again.") }
-                }
-                override fun onResponse(call: Call, response: Response) {
-                    val result = runCatching {
-                        response.use {
-                            check(it.isSuccessful) { "OpenAI transcription failed (HTTP ${it.code}). Check your key and quota, then start again." }
-                            val json = JSONObject(it.body?.string().orEmpty())
-                            val text = json.optString("text").trim()
-                            val languages = json.optJSONArray("languages")
-                            check(text.isNotBlank() && text != "null" && (languages == null || languages.length() > 0)) {
-                                "No clear speech recognized. Start again and speak closer to the glasses microphone."
-                            }
-                            text
-                        }
-                    }
-                    wav.fill(0)
-                    main.post {
-                        if (!state.enabled || !capture.isCurrent(clip.generation)) return@post
-                        this@GlassesVoice.call = null
-                        result.onSuccess { text ->
-                            log("Glasses voice: transcription received")
-                            publish(state.copy(phase = Phase.ANSWER, detail = "${state.target} is answering…"))
-                            runCatching { submit(state.source, text) }.onFailure {
-                                stop("Unable to send the question. Check the assistant connection, then start again.")
-                            }
-                        }.onFailure {
-                            // HTTP status is useful; response bodies and audio/transcripts are never logged.
-                            val message = if (it is IllegalStateException) it.message.orEmpty() else "Invalid transcription response. Start again."
-                            fail(clip.generation, message)
-                        }
-                    }
-                }
-            })
-        } catch (error: Exception) {
-            clip.samples.fill(0)
-            fail(clip.generation, "Unable to start transcription. Check OpenAI settings, then start again.")
-        }
-    }
-
-    private fun fail(generation: Long, message: String) {
-        if (state.enabled && capture.isCurrent(generation)) { log(message); stop(message) }
-    }
-
     fun answerFinished(source: AnswerSource) {
         if (state.phase != Phase.ANSWER || state.source != source) return
-        resumeAt = SystemClock.elapsedRealtime() + 2_500
+        resumeAt = SystemClock.elapsedRealtime() + 750
         publish(state.copy(phase = Phase.COOLDOWN, detail = "Answer ready. Listening resumes shortly."))
     }
-
     fun tick(assistantRunning: Boolean) {
         if (!state.enabled) return
         val now = SystemClock.elapsedRealtime()
-        if (now - lastAudio > 15_000) { stop("Glasses audio stopped. Reconnect or reopen Live prompts, then start again."); return }
-        if (state.phase == Phase.ANSWER && !assistantRunning) {
-            stop("Assistant request ended without an answer. Check its status, then start again.")
-        } else if (state.phase == Phase.COOLDOWN && now >= resumeAt) {
-            capture.arm()
-            publish(state.copy(phase = Phase.LISTENING, detail = "Listening through glasses. Speak, then pause."))
+        if (now - lastAudio > 15_000) { stop("Glasses audio stopped. Reopen Live prompts, then start again."); return }
+        if (state.phase == Phase.CONNECTING && now - phaseStarted > 20_000) stop("Live transcription did not connect. Check internet and start again.")
+        else if (state.phase == Phase.TRANSCRIBING && now - phaseStarted > 30_000) stop("Live transcription timed out. Start again.")
+        else if (state.phase == Phase.ANSWER && !assistantRunning) stop("Assistant request ended without an answer. Check its status, then start again.")
+        else if (state.phase == Phase.COOLDOWN && now >= resumeAt) runCatching { connectStream(true) }
+            .onFailure { stop("Unable to reconnect live transcription. Check OpenAI settings.") }
+    }
+    fun feedback(answer: String?): PageContent? {
+        val title: String
+        val body: String
+        when (state.phase) {
+            Phase.OFF -> { title = "Voice is off"; body = state.detail }
+            Phase.CONNECTING -> {
+                if (keepAnswerWhileConnecting && !answer.isNullOrBlank()) return null
+                title = "Connecting voice"; body = "Opening live English transcription…"
+            }
+            Phase.LISTENING -> { title = "Listening"; body = answer?.takeIf { it.isNotBlank() } ?: "Speak, then pause to ask a question." }
+            Phase.SPEAKING -> { title = "Hearing you"; body = state.transcript.ifBlank { "Pause briefly to send your question." } }
+            Phase.TRANSCRIBING -> { title = "Transcribing"; body = state.transcript.ifBlank { "Finishing your English question…" } }
+            Phase.ANSWER -> { title = "Thinking"; body = state.transcript }
+            Phase.COOLDOWN -> return null
+        }
+        return PageContent("voice:${state.phase}:$body", title, body)
+    }
+    private fun publish(next: State) {
+        if (next != state) {
+            if (next.phase != state.phase) phaseStarted = SystemClock.elapsedRealtime()
+            state = next; changed()
         }
     }
-
-    private fun publish(next: State) { if (next != state) { state = next; changed() } }
     fun close() { stop(); main.removeCallbacksAndMessages(null); http.dispatcher.cancelAll(); http.connectionPool.evictAll() }
 }

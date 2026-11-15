@@ -22,9 +22,9 @@ class SpeechSegmenterTest {
         s.accept(samples(1000, 30))
         assertNull(s.accept(samples(600, 1500)))
         assertTrue(s.speaking)
-        assertNull(s.accept(samples(1000)))
-        val result = s.accept(samples(200))!!
-        assertEquals(2100 * 48, result.size)
+        assertNull(s.accept(samples(600)))
+        val result = s.accept(samples(100))!!
+        assertEquals(1600 * 48, result.size)
         assertEquals(30.toShort(), result[0])
         assertEquals(1500.toShort(), result[300 * 48])
         assertFalse(s.speaking)
@@ -32,9 +32,9 @@ class SpeechSegmenterTest {
     @Test fun shortPausesDoNotSplitAQuestion() {
         val s = SpeechSegmenter()
         s.accept(samples(400, 1800))
-        assertNull(s.accept(samples(700)))
+        assertNull(s.accept(samples(400)))
         assertNull(s.accept(samples(400, 1800)))
-        assertEquals(2700 * 48, s.accept(samples(1200))!!.size)
+        assertEquals(1900 * 48, s.accept(samples(700))!!.size)
     }
     @Test fun longSpeechIsCappedAtTwentySeconds() {
         val s = SpeechSegmenter()

@@ -34,6 +34,7 @@ internal data class GlassesState(
     val session: PageSession? = null,
     val audio: AudioState = AudioState(),
     val answer: AnswerContent? = null,
+    val voiceFeedback: PageContent? = null,
     val revision: Long = 0,
     val nextSession: Long = 1,
     val answerPermit: AnswerPermit? = null,
@@ -69,6 +70,7 @@ internal sealed interface PageSignal {
     data class Closed(val error: String? = null) : PageSignal
 }
 internal sealed interface GlassesEvent {
+    data class VoiceFeedbackChanged(val content: PageContent?) : GlassesEvent
     data object BeginConnection : GlassesEvent
     data class LinkChanged(val state: LinkState) : GlassesEvent
     data class NavigationChanged(val state: NavigationState) : GlassesEvent

@@ -115,7 +115,7 @@ internal fun AssistantScreen(model: AppModel, actions: UiActions, configure: (St
             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Outlined.MicNone, null, Modifier.size(20.dp))
-                    Text("Glasses voice", Modifier.weight(1f).padding(start = 8.dp), style = MaterialTheme.typography.titleSmall)
+                    Text("Glasses voice · Live", Modifier.weight(1f).padding(start = 8.dp), style = MaterialTheme.typography.titleSmall)
                     TextButton(
                         onClick = { model.attempt {
                             if (s.glassesVoice.enabled) model.service().stopGlassesVoice()
@@ -128,11 +128,14 @@ internal fun AssistantScreen(model: AppModel, actions: UiActions, configure: (St
                     if (s.glassesVoice.enabled) "${s.glassesVoice.target} · ${s.glassesVoice.detail}" else s.glassesVoice.detail,
                     style = MaterialTheme.typography.bodySmall,
                 )
+                if (s.glassesVoice.transcript.isNotBlank()) Text(
+                    s.glassesVoice.transcript, style = MaterialTheme.typography.bodyMedium, maxLines = 3,
+                )
                 if (s.glassesVoice.phase == GlassesVoice.Phase.SPEAKING) {
                     TextButton(onClick = { model.attempt { model.service().sendGlassesSpeech() } }) { Text("Send speech now") }
                 }
                 if (!s.glassesVoice.enabled) Text(
-                    "While enabled, glasses speech is sent to OpenAI in English using your API key. The app does not save audio. Speak, then pause to ask.",
+                    "While enabled, glasses speech streams to OpenAI in English using your API key. The app does not save audio. Speak, then pause to ask.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

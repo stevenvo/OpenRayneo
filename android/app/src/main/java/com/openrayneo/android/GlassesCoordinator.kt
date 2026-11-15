@@ -39,6 +39,7 @@ internal object GlassesCoordinator {
             state = state.copy(answer = content)
         }
         when (event) {
+            is GlassesEvent.VoiceFeedbackChanged -> state = state.copy(voiceFeedback = event.content)
             GlassesEvent.BeginConnection -> {
                 resetSession()
                 setIntent(if (state.navigation.enabled) DisplayIntent.Navigation else DisplayIntent.PromptStandby)
@@ -189,12 +190,12 @@ internal object GlassesCoordinator {
         if (state.disconnecting || state.ownership != DisplayOwnership.APP) return null
         return when (val intent = state.intent) {
             DisplayIntent.Idle -> null
-            DisplayIntent.PromptStandby -> PageMode.PROMPT to PageContent("standby", "OpenRayneo", "Live prompts ready")
+            DisplayIntent.PromptStandby -> PageMode.PROMPT to (state.voiceFeedback ?: PageContent("standby", "OpenRayneo", "Live prompts ready"))
             DisplayIntent.Navigation -> state.navigation.frame?.takeIf { state.navigation.enabled }?.let {
                 PageMode.NAVIGATION to PageContent("navigation", it)
             }
             is DisplayIntent.Answer -> state.answer?.takeIf { it.ref == intent.ref }?.let {
-                PageMode.PROMPT to PageContent("${it.ref.source}:${it.ref.taskId}", it.question.ifBlank { "Agent" }, it.text)
+                PageMode.PROMPT to (state.voiceFeedback ?: PageContent("${it.ref.source}:${it.ref.taskId}", it.question.ifBlank { "Agent" }, it.text))
             }
         }
     }

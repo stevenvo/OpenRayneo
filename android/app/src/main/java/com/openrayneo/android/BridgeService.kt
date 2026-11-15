@@ -22,6 +22,7 @@ internal class BridgeService : Service() {
     private lateinit var display: GlassesDisplay
     private lateinit var audio: PromptAudio
     private lateinit var voice: GlassesVoice
+    private val weather = WeatherTool()
     val glassesVoice get() = voice.state
     val navigation get() = NavigationFeed
     lateinit var agent: MobileAgent; private set
@@ -46,6 +47,30 @@ internal class BridgeService : Service() {
     private val pendingAnswers = mutableMapOf<AnswerSource, AnswerPermit>()
     private var notificationText = ""
     private var notificationReadStatus = ""
+    private val voicePaint = Runnable { paintVoiceFeedback() }
+    private fun voiceChanged() {
+        if (!initialized) return
+        main.removeCallbacks(voicePaint)
+        paintVoiceFeedback()
+        updateNotification(); notifyUI()
+    }
+    private fun assistantChanged() {
+        if (initialized && voice.state.phase == GlassesVoice.Phase.ANSWER && !main.hasCallbacks(voicePaint))
+            main.postDelayed(voicePaint, 200)
+        notifyUI()
+    }
+    private fun paintVoiceFeedback() {
+        if (!initialized || destroyed) return
+        val previousAnswer = state.answer?.text.takeIf { state.intent is DisplayIntent.Answer }
+        var content = voice.feedback(previousAnswer)
+        if (voice.state.phase == GlassesVoice.Phase.ANSWER) {
+            val partial = if (voice.state.source == AnswerSource.MOBILE_AGENT)
+                agent.answer.takeIf { agent.question == voice.state.transcript }.orEmpty()
+            else codex.answer.takeIf { codex.question == voice.state.transcript }.orEmpty()
+            if (partial.isNotBlank()) content = PageContent("stream:${partial.take(2000)}", "Answer", partial.take(2000))
+        }
+        dispatch(GlassesEvent.VoiceFeedbackChanged(content))
+    }
     private val navigationObserver: () -> Unit = {
         if (notificationReadStatus != navigation.listenerState.detail) {
             notificationReadStatus = navigation.listenerState.detail
@@ -73,7 +98,7 @@ internal class BridgeService : Service() {
         supervisor = ConnectionSupervisor(this, main,
             { dispatch(GlassesEvent.LinkChanged(it)) }, { devices[it.bluetooth.address] = it; notifyUI() },
             { frame, source -> runCatching { display.receive(frame, source) }.onFailure { onLog("Unable to parse glasses message: $source") } }, ::onLog)
-        voice = GlassesVoice(settings, { updateNotification(); notifyUI() }, ::onLog) { source, text ->
+        voice = GlassesVoice(settings, ::voiceChanged, ::onLog) { source, text ->
             submitAnswer(source, text, fromGlassesVoice = true)
         }
         audio = PromptAudio(voice::consume)
@@ -84,8 +109,8 @@ internal class BridgeService : Service() {
             { dispatch(GlassesEvent.ExternalPage(it)) })
         navigation.initialize(this)
         navigation.observers.add(navigationObserver)
-        agent = MobileAgent(settings, ::notifyUI, ::executeTool) { question, answer -> completed(AnswerSource.MOBILE_AGENT, question, answer) }
-        codex = CodexClient(settings, ::notifyUI) { question, answer -> completed(AnswerSource.COMPUTER_CODEX, question, answer) }
+        agent = MobileAgent(settings, ::assistantChanged, ::executeTool) { question, answer -> completed(AnswerSource.MOBILE_AGENT, question, answer) }
+        codex = CodexClient(settings, ::assistantChanged) { question, answer -> completed(AnswerSource.COMPUTER_CODEX, question, answer) }
         getSystemService(NotificationManager::class.java).createNotificationChannel(
             NotificationChannel("bridge", "Glasses connection and navigation", NotificationManager.IMPORTANCE_LOW))
         initialized = true
@@ -241,6 +266,7 @@ internal class BridgeService : Service() {
 
     fun submitAnswer(source: AnswerSource, text: String, fromGlassesVoice: Boolean = false) {
         if (!fromGlassesVoice && voice.state.enabled) stopGlassesVoice()
+        if (!fromGlassesVoice) dispatch(GlassesEvent.VoiceFeedbackChanged(null))
         when (source) {
             AnswerSource.MOBILE_AGENT -> check(!agent.running) { "Wait for the answer or stop the current request" }
             AnswerSource.COMPUTER_CODEX -> check(codex.connected && !codex.running) { "Connect to your computer and wait for the current task to finish" }
@@ -296,6 +322,7 @@ internal class BridgeService : Service() {
     private fun navigationSnapshot() = NavigationState(navigation.enabled, navigation.selectedKey, navigation.frame)
     private fun executeTool(name: String, args: JSONObject, completion: (Result<JSONObject>) -> Unit) {
         when (name) {
+            "get_weather" -> weather.fetch(args, completion)
             "navigation_status" -> completion(Result.success(JSONObject().put("following", state.navigation.enabled)
                 .put("notificationPresent", navigation.selected != null).put("status", navigation.status)))
             "stop_navigation_mirroring" -> { stopNavigation(); completion(Result.success(JSONObject().put("following", false).put("gaodeNavigationChanged", false))) }
@@ -340,7 +367,7 @@ internal class BridgeService : Service() {
     override fun onDestroy() {
         destroyed = true; observers.clear(); main.removeCallbacksAndMessages(null)
         navigation.observers.remove(navigationObserver)
-        voice.close(); agent.close(); codex.close(); display.reset(); audio.close(); supervisor.close()
+        voice.close(); weather.close(); agent.close(); codex.close(); display.reset(); audio.close(); supervisor.close()
         stopForeground(STOP_FOREGROUND_REMOVE)
         super.onDestroy()
     }

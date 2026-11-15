@@ -44,7 +44,7 @@ internal class MobileAgent(private val settings: AppSettings, private val change
         question = text; running = true; answer = ""; status = "Phone agent is thinking…"; changed()
         val messages = JSONArray(history.toString())
         if (messages.length() == 0) messages.put(JSONObject().put("role", "system").put("content",
-            "You are the OpenRayneo phone assistant. Respond concisely in English unless the user requests another language. Only tool results establish completed actions. Navigation starts in Gaode. This app reads selected Gaode notifications and does not plan routes. Never invent directions, distances, traffic or completed actions. Stopping glasses mirroring does not stop Gaode navigation."))
+            "You are the OpenRayneo phone assistant. Respond concisely in English unless the user requests another language. Only tool results establish completed actions. For current weather, always call get_weather with the city and full state/region name from the user's question or conversation; ask if location is unknown. Use returned local dates, units and values; attribute the source named in the tool result. Distinguish forecasts from current observations. Never invent live weather or claim no weather access without trying the tool. Other live web data is unavailable. Navigation starts in Gaode. This app reads selected Gaode notifications and does not plan routes. Never invent directions, distances, traffic or completed actions. Stopping glasses mirroring does not stop Gaode navigation."))
         messages.put(JSONObject().put("role", "user").put("content", text))
         worker.execute {
             try {
@@ -153,6 +153,9 @@ internal class MobileAgent(private val settings: AppSettings, private val change
                 .put("parameters", JSONObject().put("type", "object").put("properties", properties).put("required", JSONArray(fields.map { it.first })).put("additionalProperties", false)))
         }
         return JSONArray().put(definition("navigation_status", "Read the current Gaode notification-following status; do not infer a route"))
+            .put(definition("get_weather", "Fetch live weather forecasts from the National Weather Service (US) or Open-Meteo (elsewhere) for a named city. Use it for live weather questions. Ask for location if missing.",
+                "city" to "City only, e.g. Bellevue", "region" to "Full state or region, e.g. Washington (not WA); empty if unknown",
+                "country_code" to "ISO two-letter country code, e.g. US"))
             .put(definition("stop_navigation_mirroring", "Stop navigation mirroring on glasses without stopping Gaode navigation"))
             .put(definition("show_notification", "Send a short notification to the glasses", "title" to "Title", "body" to "Body"))
     }

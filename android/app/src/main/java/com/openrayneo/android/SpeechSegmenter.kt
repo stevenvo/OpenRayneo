@@ -5,12 +5,12 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 /** Bounded, in-memory PCM utterances. No audio files or Android microphone access. */
-internal class SpeechSegmenter {
+internal class SpeechSegmenter(private val onChunk: (ShortArray) -> Unit = {}) {
     companion object {
         const val RATE = 48_000
         const val MAX_SAMPLES = RATE * 20
         private const val PRE_ROLL = RATE * 3 / 10
-        private const val END_SILENCE = RATE * 12 / 10
+        private const val END_SILENCE = RATE * 7 / 10
         private const val MIN_VOICE = RATE * 3 / 10
         private const val FRAME = RATE / 50
     }
@@ -21,6 +21,7 @@ internal class SpeechSegmenter {
     private var count = 0
     private var voiced = 0
     private var quiet = 0
+    private var streamed = 0
     val speaking get() = count > 0
 
     fun accept(samples: ShortArray): ShortArray? {
@@ -40,6 +41,10 @@ internal class SpeechSegmenter {
                 samples.copyInto(clip, count, offset, offset + added)
                 count += added
                 if (speech) { voiced += added; quiet = 0 } else quiet += added
+                if (voiced >= MIN_VOICE && count > streamed) {
+                    onChunk(clip.copyOfRange(streamed, count))
+                    streamed = count
+                }
                 if (count == clip.size || quiet >= END_SILENCE) {
                     val result = finish()
                     if (result != null) return result
@@ -64,14 +69,14 @@ internal class SpeechSegmenter {
 
     fun reset() {
         clip.fill(0, 0, count); pre.fill(0)
-        count = 0; voiced = 0; quiet = 0; preCount = 0; preIndex = 0
+        count = 0; voiced = 0; quiet = 0; preCount = 0; preIndex = 0; streamed = 0
     }
 }
 
 /** Invalidates queued audio and network completions whenever capture is stopped or rearmed. */
-internal class UtteranceCapture {
+internal class UtteranceCapture(onChunk: (ShortArray) -> Unit = {}) {
     data class Clip(val generation: Long, val samples: ShortArray)
-    private val segmenter = SpeechSegmenter()
+    private val segmenter = SpeechSegmenter(onChunk)
     private var generation = 0L
     private var accepting = false
     @Synchronized fun arm(): Long { generation++; segmenter.reset(); accepting = true; return generation }

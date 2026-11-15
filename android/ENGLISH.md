@@ -6,7 +6,7 @@ Source: https://github.com/stevenvo/OpenRayneo/tree/english-android
 
 - Name: OpenRayneo English
 - Package: com.openrayneo.android.english
-- Version: 1.0.0-en4 (23)
+- Version: 1.0.0-en5 (24)
 - Android: 13 or later
 - Release build: not debuggable, signed with this lab's development certificate.
 
@@ -17,20 +17,25 @@ assistant defaults to English while preserving its tool-use limitations.
 ## Glasses voice (experimental)
 
 In Assistant, select Phone model or connect Computer Codex, then tap **Start
-glasses voice**. Speak a short question and pause for about 1.2 seconds. The
+glasses voice**. Speak a short question and pause for about 0.7 seconds. The
 recognized text goes to the selected assistant, and its answer appears in the
 glasses. Listening resumes after the answer. Tap **Stop voice** in the app or
 its foreground notification to stop. The mode starts off after each app launch.
 
 Audio path: glasses microphones -> Bluetooth Opus -> phone PCM decoder ->
-OpenAI `gpt-transcribe` -> selected assistant -> glasses prompt page.
+OpenAI `gpt-live-transcribe` -> selected assistant -> glasses prompt page.
+Speech is sent during the question and partial transcripts appear on the
+phone and glasses. Answers are displayed as the assistant streams them.
+The glasses show the actual voice state, including when voice is off.
 No phone microphone permission is needed for this path. The existing **Phone
 voice input** remains a separate Android speech-service fallback (en-US).
 
 Glasses voice requires an OpenAI API key configured under Phone model, with
 `https://api.openai.com/v1` as the endpoint, even when Computer Codex provides
-the answer. Transcription uses `POST /v1/audio/transcriptions`, an English
-language hint, and a WAV held in memory. OpenAI API charges apply. This app
+the answer. Transcription uses `wss://api.openai.com/v1/realtime?intent=transcription`,
+24 kHz mono PCM in 100 ms packets, an English language hint, and low delay.
+Each question has its own streaming session and matching committed item ID.
+OpenAI API charges apply. This app
 does not write audio recordings to storage. Audio leaves the phone only while
 the mode is enabled; OpenAI's API data policies apply to those requests.
 Stopping cancels pending transcription and ignores late results; it cannot
@@ -39,14 +44,27 @@ context during the session.
 
 The prototype uses energy and duration to detect utterances, not a wake word
 or speaker identification. It can hear nearby speech. It keeps 300 ms of
-pre-roll, requires 300 ms of voiced audio, ends after 1.2 s of quiet, and caps
+pre-roll, requires 300 ms of voiced audio before streaming, ends after 0.7 s of quiet, and caps
 each question at 20 s. It selects the stronger decoded channel and pauses
 capture during transcription and answering. Background noise can cause false
 starts. **Send speech now** is available during capture. Disconnects, display
 handoff, audio failures, and navigation stop voice mode. Start it again explicitly.
 
 Transcription API reference:
-https://developers.openai.com/api/reference/resources/audio/subresources/transcriptions/methods/create
+https://developers.openai.com/api/docs/guides/realtime-transcription
+
+## Live weather
+
+The Phone model can call `get_weather` for a named city, full state/region and
+country. It resolves the city with Open-Meteo geocoding and checks for ambiguity.
+For US cities it retrieves the National Weather Service forecast; elsewhere
+it uses Open-Meteo's current model-based conditions and today/tomorrow forecast.
+NWS period temperatures are forecast highs/lows, not current measurements.
+Responses include location, local time, units and source. This does not use
+phone GPS, send the OpenAI API key to the weather service, or add general web
+search. If the city is missing or ambiguous, the assistant asks for it.
+Data and attribution: https://open-meteo.com/ and https://open-meteo.com/en/docs;
+https://www.weather.gov/documentation/services-web-api
 
 Chinese Gaode notification recognition is retained, while extracted direction
 labels, distance units, the navigation demo and display-session language are
@@ -79,15 +97,22 @@ authentication, RFCOMM connection, audio reception and notification display were
 verified on an iO / Strix 1.0.6.11 with a Samsung Android 17 phone.
 The wearer confirmed the English notification. The official RayNeo app needed
 to be disabled because Android restarted its companion service after force-stop.
-Version en4 passes 20 unit tests and release lint (zero errors, 16 warnings).
+Version en5 passes 29 unit tests and release lint (zero errors, 16 warnings).
 Ten speech tests cover silence/click rejection, pause detection, pre-roll,
 duration limits, PCM/WAV encoding, stereo handling, and cancellation generations.
-End-to-end glasses voice was verified on 2026-11-14 with Strix 1.0.6.11:
+Nine more tests cover streaming before end-of-turn, PCM conversion and packet
+sizes, matching/duplicate transcripts, and display status without losing answers.
+The en4 completed-question path was verified on 2026-11-14 with Strix 1.0.6.11:
 SPP microphone packets were decoded, `gpt-transcribe` returned English text,
 the configured phone model answered, and the wearer confirmed the answer in
 the lenses. Multiple speech turns completed. Extended background reliability,
 noisy environments, and voice-to-Computer-Codex remain unverified; typed
 requests to both assistants were previously verified on this setup.
+The en5 streaming connection, English transcript completion, and answer delivery
+were tested on the same phone/glasses. Observed final-transcript latency was
+approximately 0.45–0.65 seconds after commit, in addition to the 0.7-second
+end-of-speech pause. This is a small functional sample, not a latency benchmark.
+The phone weather path still requires a separate hardware check.
 The original application can be removed separately; this package has its own
 settings and Android app identity.
 

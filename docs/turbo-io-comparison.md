@@ -35,6 +35,36 @@ Primary sources: [Android capability/status table](https://github.com/Turbo1123/
 [iOS local translation](https://github.com/Turbo1123/Turbo-IO/tree/28a0fef0a42773f38222fcd0db2e0f2852ed4257/official-addon/local-translation),
 [version-specific firmware notes](https://github.com/Turbo1123/Turbo-IO/blob/28a0fef0a42773f38222fcd0db2e0f2852ed4257/firmware-research/strix-1.0.6.11/README.md).
 
+## How the UX is organized
+
+The Android extension adds a **Turbo IO button inside the official app** and
+opens its own full-screen hub without replacing the vendor's tabs. The hub has
+Home, Translation, News and Settings navigation, six illustrated feature tiles,
+and shortcuts for model configuration and camera control. Its native Android
+views use dark plum backgrounds, off-white text, lime buttons, rounded cards
+and scrollable detail screens. Much of the inspected UI text is Chinese.
+[Phone hub implementation](https://github.com/Turbo1123/Turbo-IO/blob/28a0fef0a42773f38222fcd0db2e0f2852ed4257/android-addon/src/com/turboio/addon/EditorialUI.java).
+
+The glasses' native renderer provides **two or three rows of three icons**,
+selection motion, page indicators, and a time/battery header. Its 18 labels mix
+stock applications with Turbo additions; Dots remains unfinished despite its
+menu entry. Crown input controls selection and app-specific actions. This
+provides a more integrated native menu than OpenRayneo can offer through stock
+temporary pages. [Menu renderer](https://github.com/Turbo1123/Turbo-IO/blob/28a0fef0a42773f38222fcd0db2e0f2852ed4257/firmware-research/strix-1.0.6.11/src/focus-v1/focus_menu.c).
+
+Complex authoring stays on the phone: **choose a template → edit/preview →
+confirm sending → read the glasses' result**. The dashboard editor supports
+dragging components, text/value edits, undo and local drafts. The app gallery
+previews packages and queries four actual device slots before installation;
+phone drafts are distinguished from installed content.
+[Card editor](https://github.com/Turbo1123/Turbo-IO/blob/28a0fef0a42773f38222fcd0db2e0f2852ed4257/android-addon/src/com/turboio/addon/CardUI.java),
+[app gallery](https://github.com/Turbo1123/Turbo-IO/blob/28a0fef0a42773f38222fcd0db2e0f2852ed4257/android-addon/src/com/turboio/addon/GalleryUI.java).
+
+This is a source-based UX description, not a hands-on usability evaluation.
+Several repository hero illustrations are explicitly labeled generated
+concepts. Some UI labels also retain old version references, so release gates
+and code profiles are stronger compatibility evidence than screen copy.
+
 ## The compatibility gap on this device
 
 Steven has **Android app 1.0.20 (309), Strix OS 1.0.6.11**.

@@ -6,7 +6,7 @@ Source: https://github.com/stevenvo/OpenRayneo/tree/english-android
 
 - Name: OpenRayneo English
 - Package: com.openrayneo.android.english
-- Version: 1.0.0-en5 (24)
+- Version: 1.0.0-en6 (25)
 - Android: 13 or later
 - Release build: not debuggable, signed with this lab's development certificate.
 
@@ -97,7 +97,7 @@ authentication, RFCOMM connection, audio reception and notification display were
 verified on an iO / Strix 1.0.6.11 with a Samsung Android 17 phone.
 The wearer confirmed the English notification. The official RayNeo app needed
 to be disabled because Android restarted its companion service after force-stop.
-Version en5 passes 29 unit tests and release lint (zero errors, 16 warnings).
+Version en6 passes 34 unit tests and release lint (zero errors, 16 warnings).
 Ten speech tests cover silence/click rejection, pause detection, pre-roll,
 duration limits, PCM/WAV encoding, stereo handling, and cancellation generations.
 Nine more tests cover streaming before end-of-turn, PCM conversion and packet
@@ -112,7 +112,14 @@ The en5 streaming connection, English transcript completion, and answer delivery
 were tested on the same phone/glasses. Observed final-transcript latency was
 approximately 0.45–0.65 seconds after commit, in addition to the 0.7-second
 end-of-speech pause. This is a small functional sample, not a latency benchmark.
-The phone weather path still requires a separate hardware check.
+Version en6 follows bounded HTTPS redirects on the same weather host, fixing
+the HTTP 301 returned when NWS rounds a location's coordinates. Five regression
+tests cover canonical relative/absolute locations and rejected destinations.
+The installed en6 phone model retrieved Bellevue's NWS forecast successfully
+on 2026-11-14. The glasses rejected display startup with status 4 during this
+check; wearer verification of the weather answer was deferred. Voice was off
+at the end of that test. The phone's wired-power stay-awake setting was verified
+active for both AC- and USB-classified cable connections.
 The original application can be removed separately; this package has its own
 settings and Android app identity.
 

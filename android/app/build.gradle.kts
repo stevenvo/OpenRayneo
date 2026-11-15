@@ -13,8 +13,8 @@ android {
         applicationId = "com.openrayneo.android.english"
         minSdk = 33
         targetSdk = 36
-        versionCode = 24
-        versionName = "1.0.0-en5"
+        versionCode = 25
+        versionName = "1.0.0-en6"
     }
     buildTypes {
         getByName("release") {

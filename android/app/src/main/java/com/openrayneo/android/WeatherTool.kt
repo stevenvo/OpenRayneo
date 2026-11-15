@@ -84,13 +84,27 @@ internal class WeatherTool {
             .put("data_kind", "Live forecast fetched now. Period temperatures are forecast highs/lows, not current measured temperature. Use period names and dates; never call tonight's low the current temperature.")
             .put("periods", periods)
     }
-    private fun get(url: HttpUrl): JSONObject = http.newCall(Request.Builder().url(url)
-        .header("User-Agent", "OpenRayneo-English (https://github.com/stevenvo/OpenRayneo)").build()).execute().use {
-        check(it.isSuccessful) { "Weather service returned HTTP ${it.code}. Try again shortly." }
-        val body = checkNotNull(it.body) { "Weather service returned no data." }
-        val bytes = body.byteStream().readNBytes(1_000_001)
-        check(bytes.size <= 1_000_000) { "Weather response was too large." }
-        JSONObject(String(bytes, Charsets.UTF_8))
+    private fun get(url: HttpUrl): JSONObject {
+        var target = url
+        // NWS canonicalizes coordinate precision with HTTP 301. Only follow HTTPS
+        // redirects on the same host, and always close the previous response first.
+        repeat(4) {
+            val result = http.newCall(Request.Builder().url(target)
+                .header("User-Agent", "OpenRayneo-English (https://github.com/stevenvo/OpenRayneo)").build()).execute().use { response ->
+                if (response.code in setOf(301, 302, 303, 307, 308)) {
+                    target = WeatherRedirect.resolve(target, checkNotNull(response.header("Location")) { "Weather redirect has no address." })
+                    null
+                } else {
+                    check(response.isSuccessful) { "Weather service returned HTTP ${response.code}. Try again shortly." }
+                    val body = checkNotNull(response.body) { "Weather service returned no data." }
+                    val bytes = body.byteStream().readNBytes(1_000_001)
+                    check(bytes.size <= 1_000_000) { "Weather response was too large." }
+                    JSONObject(String(bytes, Charsets.UTF_8))
+                }
+            }
+            if (result != null) return result
+        }
+        error("Weather service redirected too many times. Try again shortly.")
     }
     fun close() { http.dispatcher.cancelAll(); worker.shutdownNow(); main.removeCallbacksAndMessages(null); http.connectionPool.evictAll() }
 }

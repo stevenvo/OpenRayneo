@@ -10,11 +10,11 @@ android {
     buildToolsVersion = "36.0.0"
 
     defaultConfig {
-        applicationId = "com.openrayneo.android"
+        applicationId = "com.openrayneo.android.english"
         minSdk = 33
         targetSdk = 36
-        versionCode = 19
-        versionName = "1.0.0"
+        versionCode = 23
+        versionName = "1.0.0-en4"
     }
     buildTypes {
         getByName("release") {
@@ -32,6 +32,7 @@ android {
 }
 
 dependencies {
+    testImplementation("junit:junit:4.13.2")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation(platform("androidx.compose:compose-bom:2025.04.01"))
     implementation("androidx.activity:activity-compose:1.10.1")

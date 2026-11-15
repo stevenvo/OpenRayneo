@@ -20,21 +20,22 @@ internal data class CompanionState(
     val glasses: GlassesState = GlassesState(),
     val devices: List<RayneoConnection.Device> = emptyList(),
     val navigationEntries: List<NavigationFeed.Entry> = emptyList(),
-    val navigationStatus: String = "在高德开始导航后，回到这里跟随通知",
+    val navigationStatus: String = "Start navigation in Gaode, then return here to follow it",
     val notificationConnected: Boolean = false,
     val phoneQuestion: String = "",
     val phoneAnswer: String = "",
     val phoneRunning: Boolean = false,
-    val phoneStatus: String = "配置模型后即可开始对话",
+    val phoneStatus: String = "Configure a model to start chatting",
     val computerQuestion: String = "",
     val computerAnswer: String = "",
     val computerRunning: Boolean = false,
-    val computerStatus: String = "电脑尚未连接",
+    val computerStatus: String = "Computer not connected",
     val computerConnected: Boolean = false,
     val approvals: List<CodexClient.Request> = emptyList(),
     val logs: List<String> = emptyList(),
     val audioLevels: PromptAudio.State = PromptAudio.State(),
-    val notificationReadStatus: String = "等待通知监听服务",
+    val glassesVoice: GlassesVoice.State = GlassesVoice.State(),
+    val notificationReadStatus: String = "Waiting for notification service",
     val notificationSnapshotAt: Long = 0,
     val notificationReadPhase: NotificationReadPhase = NotificationReadPhase.DISCONNECTED,
 )
@@ -121,18 +122,18 @@ internal class AppModel(application: Application) : AndroidViewModel(application
                 connection,
                 Context.BIND_AUTO_CREATE,
             )
-        if (!bound) error = "暂时无法启动连接服务，请重新打开应用"
+        if (!bound) error = "Cannot start the connection service. Reopen the app."
     }
 
     fun attempt(action: () -> Unit) {
         try {
             action()
         } catch (failure: Exception) {
-            error = failure.message ?: "操作未完成，请重试"
+            error = failure.message ?: "Action failed. Try again."
         }
     }
 
-    fun service(): BridgeService = checkNotNull(bridge) { "连接服务正在准备，请稍后重试" }
+    fun service(): BridgeService = checkNotNull(bridge) { "Connection service is starting. Try again shortly." }
 
     private fun refresh() {
         val s = bridge ?: return
@@ -156,6 +157,7 @@ internal class AppModel(application: Application) : AndroidViewModel(application
                 approvals = s.codex.requests.toList(),
                 logs = s.logs.toList(),
                 audioLevels = s.audioLevels,
+                glassesVoice = s.glassesVoice,
                 notificationReadStatus = s.navigation.listenerState.detail,
                 notificationSnapshotAt = s.navigation.lastSnapshotAt,
                 notificationReadPhase = s.navigation.listenerState.phase,
@@ -220,7 +222,7 @@ internal class AppModel(application: Application) : AndroidViewModel(application
         }
         config = updated
         resetFormDrafts()
-        notice = "配置已加密保存"
+        notice = "Settings saved securely"
     }
 
     private fun resetFormDrafts() {
@@ -237,7 +239,7 @@ internal class AppModel(application: Application) : AndroidViewModel(application
     fun send(source: AnswerSource) = attempt {
         val mobile = source == AnswerSource.MOBILE_AGENT
         val text = (if (mobile) phoneDraft else computerDraft).trim()
-        require(text.isNotBlank()) { "先写下你的问题" }
+        require(text.isNotBlank()) { "Enter a question first" }
         val old =
             if (mobile) ChatRecord(state.phoneQuestion, state.phoneAnswer)
             else ChatRecord(state.computerQuestion, state.computerAnswer)

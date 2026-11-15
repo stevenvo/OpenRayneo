@@ -24,7 +24,7 @@ internal class MainActivity : ComponentActivity() {
             if (model.wantsScan) {
                 model.wantsScan = false
                 if (model.bluetoothAllowed) model.scan()
-                else model.error = "连接眼镜需要附近设备权限。可以稍后在设置中授权，其他配置仍可使用。"
+                else model.error = "Nearby devices permission is required to connect glasses. You can grant it later and configure other features now."
             }
         }
     private val importFile =
@@ -32,7 +32,7 @@ internal class MainActivity : ComponentActivity() {
             if (uri != null)
                 model.attempt {
                     val bytes = contentResolver.openInputStream(uri)!!.use { it.readNBytes(16385) }
-                    require(bytes.size <= 16384) { "配置文件过大" }
+                    require(bytes.size <= 16384) { "Configuration file is too large" }
                     model.importConfig(JSONObject(String(bytes, Charsets.UTF_8)))
                 }
         }
@@ -98,7 +98,7 @@ internal class MainActivity : ComponentActivity() {
                                             NavigationFeed.PACKAGE
                                         )
                                     ) {
-                                        "请先在手机安装高德地图"
+                                        "Install Gaode Maps on your phone first"
                                     }
                                 )
                             }
@@ -115,7 +115,7 @@ internal class MainActivity : ComponentActivity() {
                                             RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                                             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM,
                                         )
-                                        .putExtra(RecognizerIntent.EXTRA_LANGUAGE, "zh-CN")
+                                        .putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US")
                                 )
                             }
                         },

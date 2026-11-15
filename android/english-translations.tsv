@@ -1,0 +1,472 @@
+在高德开始导航后，回到这里跟随通知	Start navigation in Gaode, then return here to follow it
+配置模型后即可开始对话	Configure a model to start chatting
+电脑尚未连接	Computer not connected
+等待通知监听服务	Waiting for notification service
+暂时无法启动连接服务，请重新打开应用	Cannot start the connection service. Reopen the app.
+操作未完成，请重试	Action failed. Try again.
+连接服务正在准备，请稍后重试	Connection service is starting. Try again shortly.
+配置已加密保存	Settings saved securely
+先写下你的问题	Enter a question first
+手机模型 · 处理中	Phone model · Working
+电脑 · 待回复	Computer · Reply needed
+电脑 · 处理中	Computer · Working
+模型配置已保存 · 可以开始提问	Model configured · Ready for questions
+新建对话	New conversation
+手机模型尚未配置	Phone model not configured
+电脑尚未配置	Computer not configured
+连接自己的模型服务，在手机上独立问答。也可以查询导航跟随状态或发送眼镜通知。	Use your model service on the phone. Check navigation status or send a notification to the glasses.
+连接电脑上的 Codex，查看任务进度，在这里完成审批并接收回答。	Connect to Codex on your computer to follow tasks, review approvals and receive answers.
+配置手机模型	Set up phone model
+配置电脑连接	Set up computer connection
+连接电脑 Codex	Connect to computer Codex
+确认电脑连接程序正在运行。USB 模式需要数据线和端口转发。	Start the computer bridge first. USB mode requires a data cable and port forwarding.
+连接／恢复会话	Connect / Resume
+检查连接配置	Check connection settings
+新对话	New conversation
+试着问：现在眼镜的导航跟随状态如何？	Try asking: What is the glasses navigation status?
+写下任务，让电脑 Codex 帮你处理。	Describe a task for Codex on your computer.
+等待你的回复	Waiting for your reply
+正在处理…	Working…
+显示到眼镜	Show on glasses
+回答已复制	Answer copied
+眼镜输出	Glasses output
+回答写出约 12 秒后返回导航；也可以现在结束回答。	Navigation resumes about 12 seconds after sending the answer. You can also close it now.
+结束眼镜回答	Close answer on glasses
+问问手机模型…	Ask your phone model…
+交给电脑的任务…	A task for your computer…
+停止当前任务	Stop current task
+发送至	Send to 
+手机语音输入	Phone voice input
+电脑需要你的回复	Your computer needs a reply
+你的回复	Your reply
+提交回复	Submit reply
+允许这一次	Allow once
+拒绝	Deny
+眼镜消息解析失败	Unable to parse glasses message
+眼镜连接与导航	Glasses connection and navigation
+眼镜操作失败	Glasses operation failed
+请先断开当前连接	Disconnect the current connection first
+连接失败	Connection failed
+请等待断开完成	Wait for disconnection to finish
+该通知已消失，请在高德开始导航后刷新	This notification is gone. Start Gaode navigation and refresh.
+指令暂未识别	Instruction not recognized
+请查看高德	Check Gaode
+请先选择要跟随的高德通知	Select a Gaode notification to follow first
+请先启动导航或实时提示，并等待眼镜确认	Start navigation or Live prompts and wait for the glasses to confirm
+请等待回答，或先停止	Wait for the answer or stop the current request
+请连接电脑并等待当前任务结束	Connect to your computer and wait for the current task to finish
+请先结束当前电脑任务	Finish the current computer task first
+请先完整连接眼镜	Establish a full glasses connection first
+还没有可显示的回答	No answer to display yet
+未知工具	Unknown tool
+收音中	Receiving audio
+等待音频	Waiting for audio
+音频已中断	Audio interrupted
+音频错误	Audio error
+停止服务	Stop service
+电脑地址使用 wss://；USB 转发使用 ws://127.0.0.1:4500	Use wss:// for the computer, or ws://127.0.0.1:4500 with USB forwarding
+地址中不要包含令牌	Do not include tokens in the URL
+请先配置电脑连接令牌	Configure the computer connection token first
+正在连接电脑…	Connecting to computer…
+电脑消息解析失败	Unable to parse computer message
+电脑连接失败，请检查服务、网络和令牌	Check the computer service, network and token
+电脑连接已关闭；重连后恢复会话，任务不会自动重发	Connection closed. Reconnect to resume; tasks are not resent automatically.
+已恢复电脑运行中的任务	Resumed the running computer task
+Codex 已连接，可发送任务	Codex connected. Ready for tasks.
+电脑正在处理…	Computer is working…
+已请求停止电脑任务	Requested task cancellation
+该请求已失效	This request has expired
+目录	Directory
+文件访问范围	File access scope
+请在电脑端查看此操作详情，再决定是否允许。	Review the action details on your computer before allowing it.
+电脑任务需要你的回复	Computer task needs your reply
+电脑任务完成	Computer task completed
+电脑任务已停止	Computer task stopped
+电脑任务失败	Computer task failed
+电脑连接不可用，请重新连接查询状态	Computer unavailable. Reconnect to check status.
+电脑请求超时	Computer request timed out
+请重新连接查询状态	Reconnect to check status
+电脑连接不可用	Computer unavailable
+电脑未连接	Computer not connected
+开始使用 OpenRayneo	Get started with OpenRayneo
+开启导航跟随	Set up navigation
+配置助手	Set up assistant
+检查设置	Check setup
+欢迎使用 OpenRayneo。用几步完成设置，也可以稍后继续。	Welcome to OpenRayneo. Set up in a few steps, or come back later.
+用手机直接连接 RayNeo iO，导航与回答便能显示在眼前。	Connect your phone to RayNeo iO to see navigation and answers on the glasses.
+路线由高德规划，OpenRayneo 读取通知，把方向、距离与路名带到眼镜。	Gaode plans your route. OpenRayneo reads its navigation notifications and displays directions, distance and road names.
+手机可以独立调用模型；电脑在线时，也可以把任务交给 Codex。两项都可稍后配置。	Use a model directly on your phone, or send tasks to Codex on an online computer. You can configure both later.
+下面是当前准备情况。未完成的项目随时可以在设置中继续。	Here is your setup status. You can finish any remaining steps in Settings.
+稍后设置	Set up later
+开始使用	Get started
+抬眼看导航	Navigation at a glance
+跟随手机高德的真实导航通知	Follow navigation notifications from Gaode
+随时问助手	Ask your assistant
+连接你自己的模型与电脑 Codex	Connect your model and computer Codex
+由你掌控	You are in control
+显示与收音可以随时暂停	Pause the display and audio at any time
+眼镜已连接	Glasses connected
+连接前的小准备	Before connecting
+唤醒眼镜并靠近手机	Wake the glasses and keep them near the phone
+断开官方 App 或电脑的眼镜连接	Disconnect the glasses from the official app or computer
+在手机上确认系统配对提示	Confirm the pairing prompt on your phone
+查看连接	View connection
+只在连接时申请“附近设备”权限。未连接也可以先配置助手。	Nearby devices permission is requested when connecting. You can configure the assistant first.
+通知使用权已开启	Notification access enabled
+允许读取高德导航通知	Allow Gaode navigation notifications
+系统会授予通知使用权，应用只处理高德导航通知。通知正文不会发送给模型。	Android grants notification access. This app processes only Gaode navigation notifications; their text is not sent to the model.
+查看通知权限	View notification access
+前往开启通知使用权	Enable notification access
+沿中山路	Zhongshan Rd
+进入人民路	Renmin Rd
+沿滨河路	Binhe Rd
+演示 · 与眼镜相同的导航网格	Demo · Glasses navigation grid
+切换演示指令	Next demo instruction
+以上是界面演示，不会发送到眼镜或启动导航。真实导航请在高德 App 中开始。	This is a preview. It does not send to the glasses or start navigation. Start real navigation in Gaode.
+填写服务地址、模型名与 API Key。使用你自己的模型服务。	Enter your service URL, model name and API key to use your own model.
+导入电脑生成的配置文件，或填写连接参数。USB 联调需电脑开启转发。	Import the configuration from your computer or enter connection details. USB mode needs port forwarding.
+“已保存”只表示填写了配置。真实连接结果会在助手页显示。手机语音输入目前使用手机的识别服务。	Saved means settings are stored. Connection results appear in Assistant. Voice input currently uses the phone speech service.
+眼镜连接	Glasses connection
+稍后连接	Connect later
+导航通知权限	Navigation notification access
+稍后授权	Allow later
+已保存配置	Settings saved
+可选，稍后配置	Optional; configure later
+在后台也能看到连接状态	See connection status in the background
+允许状态通知后，可在系统通知栏查看眼镜连接并停止服务。	Status notifications let you check the connection and stop the service from Android notifications.
+允许状态通知	Allow status notifications
+在“设置 → 再看一次使用引导”中，随时回到这里。	Return here through Settings → Show setup guide.
+上一步	Back
+开始设置	Start setup
+进入 OpenRayneo	Open OpenRayneo
+继续	Continue
+查看配置	View settings
+连接你的服务	Connect your services
+尚未配置	Not configured
+连接参数与配置导入	Connection details and import
+权限与设备	Permissions and devices
+附近设备	Nearby devices
+连接眼镜时需要	Required to connect glasses
+高德通知使用权	Gaode notification access
+导航跟随时需要	Required to follow navigation
+后台状态通知	Background status notifications
+可选，查看后台连接状态	Optional; see background connection status
+设备与诊断	Devices and diagnostics
+连接日志、测试通知与音频恢复	Connection logs, test notification and audio recovery
+外观	Appearance
+跟随系统	System
+浅色	Light
+深色	Dark
+了解 OpenRayneo	About OpenRayneo
+再看一次使用引导	Show setup guide
+连接眼镜、导航演示与助手配置	Glasses connection, navigation demo and assistant setup
+音频仅在手机内存中处理。系统语音输入尚未接入眼镜音频。	Audio is processed only in phone memory. Phone speech input does not yet use glasses audio.
+模型服务配置	Model service settings
+电脑连接配置	Computer connection settings
+支持兼容 Chat Completions 且支持工具调用的模型服务。请向服务商获取地址、模型名和 API Key。	Use a Chat Completions-compatible service with tool calling. Get the URL, model name and API key from your provider.
+先在电脑运行 OpenRayneo 的 Codex 连接脚本，再导入它生成的配置。USB 模式还需要开启端口转发。	Run the OpenRayneo Codex bridge on your computer and import its configuration. USB mode also needs port forwarding.
+导入电脑配置文件	Import computer configuration
+选择 OpenRayneo-setup.json。它包含访问凭据，导入完成后请删除下载目录中的副本。	Choose OpenRayneo-setup.json. It contains credentials; delete the Downloads copy after importing.
+或手动填写	Or enter manually
+电脑服务地址	Computer service URL
+服务地址	Service URL
+服务商	provider.example
+使用 HTTPS 地址，不要把密钥放进地址中	Use HTTPS. Do not put secrets in the URL.
+USB：本机地址；无线连接：使用 WSS	USB: localhost address. Wireless: use WSS.
+模型名称	Model name
+电脑工作目录（可选）	Computer working directory (optional)
+连接令牌	Connection token
+隐藏密钥	Hide secret
+显示密钥	Show secret
+保存配置	Save settings
+凭据使用 Android Keystore 加密保存。保存不会发起模型请求或电脑任务，连接结果请在助手页查看。	Credentials are encrypted with Android Keystore. Saving does not start requests or tasks. Check connections in Assistant.
+USB 连接步骤	USB connection steps
+电脑安装并登录 Codex CLI	Install and sign in to Codex CLI on the computer
+运行仓库中的 scripts/phone-codex.py	Run scripts/phone-codex.py from the repository
+电脑执行 adb reverse tcp:4500 tcp:4500	Run adb reverse tcp:4500 tcp:4500 on the computer
+在助手页选择电脑 Codex，点击连接	Select Computer Codex in Assistant and tap Connect
+通知读取	Notification access
+系统权限已授权	System permission granted
+系统权限未授权	System permission not granted
+当前高德候选	Gaode notifications
+最近快照同步	Last notification refresh
+恢复通知读取	Reconnect notification service
+发送测试通知	Send test notification
+重启音频解码，保持页面	Restart audio decoder
+断开眼镜	Disconnect glasses
+高级连接诊断	Advanced connection diagnostics
+仅 BLE 诊断	BLE-only diagnostics
+仅用于连接排查；导航和助手显示需要完整连接。	For connection diagnostics only. Navigation and assistant displays require a full connection.
+扫描设备	Scan devices
+诊断连接	Diagnostic connection
+连接日志	Connection log
+日志已复制	Log copied
+复制日志	Copy log
+暂无连接日志	No connection logs yet
+手机模型	Phone model
+电脑 Codex	Computer Codex
+电脑连接	Computer connection
+导航通知来源	Navigation notification source
+选择包含转向和距离的通知。只有“正在导航”的消息无法提供方向。	Choose a notification with a turn and distance. A navigation-in-progress message has no directions.
+还没有收到高德导航通知	No Gaode navigation notifications yet
+高德导航	Gaode navigation
+正在跟随	Following
+跟随这条通知	Follow this notification
+操作提示	Notice
+知道了	OK
+已连接 · 手机直连	Connected · Direct phone link
+连接进度	Connection progress
+眼镜画面	Glasses display
+实时提示	Live prompts
+暂停显示与收音	Pause display and audio
+眼镜音频	Glasses audio
+单声道	Mono
+声道 1	Channel 1
+声道 2	Channel 2
+仅在手机计算音量，不保存或上传音频。	Audio levels are calculated on the phone. Audio is not saved or uploaded.
+高德通知	Gaode notifications
+手机 · 电脑	Phone · Computer
+连接你的眼镜	Connect your glasses
+让眼镜保持唤醒，并先断开官方 App 或电脑与眼镜的连接。出现系统配对提示时，请在手机上确认。	Keep the glasses awake and disconnect the official app or computer first. Confirm the pairing prompt on your phone.
+允许附近设备并扫描	Allow nearby devices and scan
+前往应用权限设置	Open app permissions
+扫描眼镜	Scan for glasses
+连接已建立	Connection established
+点按连接	Tap to connect
+未发现眼镜时，可唤醒眼镜后重新扫描。	If the glasses are not found, wake them and scan again.
+取消连接	Cancel connection
+待发送导航布局	Navigation layout to send
+完整路名显示在此处；眼镜布局保留右下角 8 格路名。	The full road name appears here. The glasses show an eight-cell road name at the bottom right.
+正在跟随高德通知	Following Gaode notifications
+准备开始	Ready to start
+小米 / HyperOS 的后台自启动可能阻止监听绑定。请检查 OpenRayneo 的“后台自启动”，允许后再恢复通知读取。	On Xiaomi / HyperOS, allow background autostart for OpenRayneo, then reconnect the notification service.
+检查应用设置	Check app settings
+最近收到通知	Last notification
+秒前	s ago
+分钟前	min ago
+请以高德实时指引为准	Follow the current directions in Gaode
+开启通知使用权	Enable notification access
+打开高德导航	Open Gaode navigation
+连接眼镜	Connect glasses
+恢复眼镜导航	Resume glasses navigation
+停止眼镜跟随	Stop following on glasses
+只停止眼镜跟随，高德导航继续运行。	This stops the glasses display. Gaode navigation continues.
+通知来源	Notification source
+等待高德导航通知	Waiting for Gaode navigation notifications
+条候选通知 · 点按选择	notifications · Tap to choose
+在高德中查看路线	View route in Gaode
+保留通知授权和跟随选择，重新连接监听并读取当前通知。	Reconnect and refresh notifications while keeping permissions and your selection.
+上方眼镜画面仅随写入结果更新，高德通知单独显示。关闭或断线后不把旧画面当成当前显示。	The preview updates after sending to the glasses. Gaode notifications appear separately. Disconnected or closed sessions do not show a stale screen as current.
+连接眼镜需要附近设备权限。可以稍后在设置中授权，其他配置仍可使用。	Nearby devices permission is required to connect glasses. You can grant it later and configure other features now.
+配置文件过大	Configuration file is too large
+请先在手机安装高德地图	Install Gaode Maps on your phone first
+重连扫描失败	Reconnect scan failed
+重连失败	Reconnection failed
+正在扫描	Scanning
+自动重连已尝试三次，请检查蓝牙后重新连接	Three reconnect attempts failed. Check Bluetooth and reconnect.
+连接中断，等待第	Connection lost. Waiting for retry 
+次重连	
+协议载荷超过 65531 字节	Protocol payload exceeds 65,531 bytes
+无效的认证消息长度	Invalid authentication message length
+认证 TLV 不完整	Incomplete authentication TLV
+认证 TLV 内容不完整	Incomplete authentication TLV content
+Protobuf 字段不完整	Incomplete Protobuf field
+Protobuf 字段过长	Protobuf field is too long
+Protobuf 内容不完整	Incomplete Protobuf content
+不支持的 Protobuf 类型	Unsupported Protobuf type
+RayNeo 智能眼镜轮廓	RayNeo smart glasses outline
+正在连接眼镜	Connecting to glasses
+解码器已重启，等待新的眼镜音频包	Decoder restarted. Waiting for new glasses audio.
+音频会话已确认，等待眼镜音频	Audio session confirmed. Waiting for glasses audio.
+页面关闭未完成，请主动重试；眼镜实际页面未知	Page closure did not finish. Retry; the current glasses page is unknown.
+正在断开眼镜	Disconnecting glasses
+实时提示已就绪	Live prompts ready
+眼镜未确认启动或布局，请主动重试	The glasses did not confirm startup or layout. Retry.
+旧显示会话尚未关闭	The previous display session is still open
+显示启动发送失败	Failed to send display startup
+检测到眼镜提词器活动，已让出显示	Teleprompter activity detected. Released display control.
+音频包，但会话不匹配，未送入解码器	audio packet belongs to another session; not decoded
+收到首个眼镜音频包	First glasses audio packet received
+眼镜请求结束或暂停当前页面（原因	The glasses ended or paused the current page (reason
+），已让出显示	). Released display control.
+眼镜拒绝启动会话	The glasses rejected session startup
+导航布局配置发送失败	Failed to send navigation layout
+眼镜返回的布局不是字体 2／宽度 100／5 行，已停止发送导航网格	Unexpected layout (requires font 2, width 100, five rows). Navigation sending stopped.
+显示更新失败	Display update failed
+关闭命令发送失败	Failed to send close command
+导航画面必须保持 20 列 × 5 行	Navigation must use a 20-column by 5-row grid
+填写模型配置后即可使用	Configure a model to get started
+模型服务地址必须使用 HTTPS，且不包含密钥或查询参数	Model URL must use HTTPS without credentials or query parameters
+请在设置中填写模型名和 API Key	Enter a model name and API key in Settings
+手机 Agent 正在思考…	Phone agent is thinking…
+你是 OpenRayneo 手机助手，使用中文简洁回答。工具结果才是执行事实。用户在高德 App 中启动导航，本应用只读取用户选定的高德通知，不负责路线规划。不能编造方向、距离、路况或已执行的操作。停止眼镜跟随不会停止高德导航。	You are the OpenRayneo phone assistant. Respond concisely in English unless the user requests another language. Only tool results establish completed actions. Navigation starts in Gaode. This app reads selected Gaode notifications and does not plan routes. Never invent directions, distances, traffic or completed actions. Stopping glasses mirroring does not stop Gaode navigation.
+已取消	Cancelled
+模型请求失败	Model request failed
+请核对地址、模型及额度	Check the URL, model and quota
+回答完成	Answer complete
+工具超时，执行结果未知；请查询状态	Tool timed out; the outcome is unknown. Check its status.
+执行工具	Running tool
+本次工具调用已达到上限，请查看当前状态后继续	Tool call limit reached. Check the current state before continuing.
+模型连接失败	Model connection failed
+模型返回流式错误	Model returned a streaming error
+模型回答未完整结束	Model answer did not complete
+模型回答过长	Model answer is too long
+模型连接提前结束，请重试	Model connection ended early. Retry.
+读取当前高德通知跟随状态，不推断路线	Read the current Gaode notification-following status; do not infer a route
+停止眼镜导航跟随，保留高德 App 正在进行的导航	Stop navigation mirroring on glasses without stopping Gaode navigation
+向眼镜发送短通知	Send a short notification to the glasses
+已停止；已执行的工具操作会保留	Stopped. Completed tool actions remain in effect.
+正在重新连接通知监听	Reconnecting notification service
+通知监听解绑失败	Failed to unbind notification service
+通知监听已断开，准备恢复	Notification service disconnected. Reconnecting.
+通知监听已连接	Notification service connected
+通知快照同步：高德候选	Notification refresh: Gaode candidates
+可解析	recognized
+读取通知失败，正在恢复监听	Notification read failed. Reconnecting service.
+通知快照读取失败	Failed to read notification snapshot
+权限已开启，正在连接通知监听	Permission granted. Connecting notification service
+通知监听重连请求失败	Notification service reconnect request failed
+通知监听绑定重置失败	Failed to reset notification binding
+权限已开启，等待恢复通知监听	Permission granted. Waiting for notification service
+通知权限已开启，但监听未连接；请点“恢复通知读取”	Permission is enabled but the service is disconnected. Tap Reconnect notification service.
+尚未开启通知使用权	Notification access not enabled
+眼镜收音已停止	Glasses audio stopped
+音频会话已确认，等待首个眼镜音频包	Audio session confirmed. Waiting for the first packet.
+包音频，等待解码输出	audio packets; waiting for decoded output
+眼镜音频已中断，导航显示可继续	Glasses audio interrupted. Navigation display can continue.
+静音	Silent
+眼镜单声道	Glasses mono
+眼镜双声道	Glasses stereo
+通道 1	Channel 1
+通道 2	Channel 2
+已解码	Decoded
+秒 · 丢弃	s · Dropped
+解码器启动失败	Unable to start audio decoder
+收到单声道数据，等待眼镜恢复双声道	Received mono audio. Waiting for glasses stereo audio.
+音频解码失败，请重启音频解码	Audio decoding failed. Restart the decoder
+解码输出与请求的 PCM16 格式不符	Decoder output does not match the requested PCM16 format
+等待连接眼镜	Waiting to connect glasses
+正在关闭眼镜会话	Closing glasses session
+已让出眼镜显示，请主动选择要恢复的功能	Display control released. Select a feature to resume.
+正在关闭原页面	Closing previous page
+仅 BLE 诊断连接，未启动显示或收音	BLE diagnostics only. Display and audio are off.
+已连接，眼镜显示空闲	Connected. Glasses display is idle.
+等待眼镜确认启动	Waiting for glasses startup confirmation
+正在确认导航布局	Confirming navigation layout
+页面已确认，正在发送内容	Page confirmed. Sending content.
+正在更新眼镜内容	Updating glasses content
+导航会话已就绪	Navigation session ready
+回答会话已就绪	Answer session ready
+实时提示会话已就绪	Live prompts session ready
+眼镜导航布局，20 列 5 行。	Glasses navigation grid, 20 columns and 5 rows. 
+已让出显示	Display control released
+尚未同步到眼镜	Not yet sent to glasses
+未开启应用显示	App display is off
+正在关闭画面	Closing display
+正在切换画面	Switching display
+等待首个画面写出	Waiting for first frame
+正在更新 · 下方为上次写出内容	Updating · Last sent content below
+导航 · 已写出内容	Navigation · Sent content
+实时提示 · 已写出内容	Live prompts · Sent content
+眼镜当前页面由设备控制，手机无法读取。	The glasses control the current page. The phone cannot read it.
+完整连接后，显示本次会话写出的内容。	Connect fully to preview content sent in this session.
+选择导航或打开实时提示。	Select Navigation or open Live prompts.
+发送记录预览，非实时屏幕截图。	Preview of sent content, not a live screenshot.
+请在高德开始导航，再选择要跟随的通知	Start navigation in Gaode, then select a notification to follow
+等待选定的高德通知；若通知已更换，请重新选择	Waiting for the selected Gaode notification. Reselect it if it changed.
+已收到高德通知，但其中没有可识别的转向和距离，请查看高德	Gaode notification received, but no turn or distance was recognized. Check Gaode.
+跟随高德	Following Gaode
+通知读取已断开	Notification service disconnected
+请查看手机	Check phone
+等待高德通知	Waiting for Gaode
+请以手机导航为准	Follow phone navigation
+通知快照不可用	Notification snapshot unavailable
+高德通知解析失败	Failed to parse Gaode notification
+等待连接	Waiting to connect
+连接超时	Connection timed out
+扫描结束，选择眼镜连接	Scan finished. Select your glasses.
+请先开启手机蓝牙	Turn on phone Bluetooth first
+正在扫描眼镜…	Scanning for glasses…
+BLE 扫描失败	BLE scan failed
+正在连接 BLE…	Connecting BLE…
+无法创建 GATT 连接	Cannot create GATT connection
+经典蓝牙已配对	Classic Bluetooth paired
+请完成手机上的系统蓝牙配对…	Confirm Bluetooth pairing on your phone…
+经典蓝牙配对状态	Classic Bluetooth bond state
+经典蓝牙配对未完成，请保持眼镜可配对并重新连接	Bluetooth pairing incomplete. Keep the glasses discoverable and reconnect.
+系统没有受理经典蓝牙配对请求	Android did not accept the Bluetooth pairing request
+BLE 连接结束	BLE connection ended
+BLE 已连接，发现服务…	BLE connected. Discovering services…
+无法启动服务发现	Cannot start service discovery
+服务发现失败	Service discovery failed
+设备没有 B81D 服务	Device has no B81D service
+缺少发送特征	Send characteristic missing
+缺少接收特征	Receive characteristic missing
+缺少身份特征	Identity characteristic missing
+发现 B81D，协商 BLE MTU…	B81D found. Negotiating BLE MTU…
+无法启动 MTU 协商	Cannot start MTU negotiation
+BLE MTU 不足	BLE MTU too small
+正在读取眼镜身份…	Reading glasses identity…
+无法读取身份特征	Cannot read identity characteristic
+眼镜身份读取失败	Failed to read glasses identity
+BLE 与所选经典蓝牙设备不匹配	BLE identity does not match the selected Bluetooth device
+身份已读取；状态	Identity read; state
+身份来源	Identity source
+眼镜绑定	Glasses binding
+本应用 Android ID	This app Android ID
+无法启用 BLE 通知	Cannot enable BLE notifications
+缺少 CCCD	CCCD missing
+正在订阅 BLE 通知…	Subscribing to BLE notifications…
+无法写入 CCCD	Cannot write CCCD
+订阅 BLE 通知失败	BLE notification subscription failed
+正在交换设备信息…	Exchanging device information…
+BLE 写入失败	BLE write failed
+收到 BLE 传输确认	BLE transfer acknowledged
+认证响应不完整	Incomplete authentication response
+收到 BLE 命令	Received BLE command
+眼镜要求账户绑定 ECDH，当前验证版不支持	The glasses require account-bound ECDH, which this build does not support
+正在进行应用认证…	Authenticating…
+认证响应缺少挑战值	Authentication response is missing the challenge
+认证挑战值长度错误	Invalid authentication challenge length
+应用认证被拒绝	Application authentication rejected
+BLE 应用认证通过	BLE application authentication passed
+BLE 已认证，可尝试通知（完整配对未验证）	BLE authenticated. Notifications may work; full pairing is unverified.
+眼镜状态	Glasses state
+发出 BLE 命令	Sent BLE command
+BLE 发送未受理	BLE send request rejected
+本应用 Android ID 不可用	App Android ID unavailable
+BLE 已认证，正在连接 SPP…	BLE authenticated. Connecting SPP…
+RFCOMM 服务 UUID	RFCOMM service UUID
+已连接：BLE 认证与 RFCOMM 均正常	Connected: BLE authenticated and RFCOMM ready
+SPP 连接失败	SPP connection failed
+眼镜关闭了数据流	The glasses closed the data stream
+数据连接结束	Data connection ended
+来自小米 13	OpenRayneo English
+安卓直连验证：你好，雷鸟眼镜。	Hello from OpenRayneo on Android!
+请先连接眼镜	Connect the glasses first
+BLE 通知已写出，请在眼镜上确认显示	BLE notification sent. Check the glasses display.
+通知已写出，请在眼镜上确认显示	Notification sent. Check the glasses display.
+通知发送失败	Notification send failed
+此功能需要完整的 RFCOMM 连接，请关闭 BLE-only 模式	This feature requires RFCOMM. Turn off BLE-only mode.
+连接已更换	Connection changed
+数据发送失败	Data send failed
+已断开	Disconnected
+已收到	Received 
+收到	Received 
+字节	bytes
+标题	Title
+正文	Body
+返回	Back
+管理	Manage
+设置	Settings
+配置	Set up 
+已授权	Granted
+已允许	Allowed
+已开启	Enabled
+已连接	Connected
+连接	Connect
+复制	Copy
+回答	Answer
+导航	Navigation
+助手	Assistant
+眼镜	Glasses

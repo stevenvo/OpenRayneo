@@ -29,3 +29,10 @@ analysis/
 # Runtime logs and macOS metadata
 *.log
 .DS_Store
+
+# Private credentials and signing material are never part of the fork
+*.jks
+*.keystore
+*.p12
+*.pem
+private/

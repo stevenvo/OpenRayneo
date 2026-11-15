@@ -1,5 +1,14 @@
 # OpenRayneo
 
+> **English Android fork:** development lives on the
+> [`english-android` branch](https://github.com/stevenvo/OpenRayneo/tree/english-android).
+> It adds an English UI, an Android Bluetooth startup fix, English display
+> sessions, and experimental glasses-microphone questions using OpenAI
+> transcription. See [setup, privacy, testing and limitations](android/ENGLISH.md).
+> No modified glasses firmware is required. The upstream documentation below
+> describes the original macOS and Android applications; its Android ASR
+> limitations are superseded only by the experimental feature described above.
+
 <img src="docs/assets/openrayneo-logo.png" alt="OpenRayneo OR logo" width="180" />
 
 [English](README.md) · [简体中文](README.zh-CN.md)
